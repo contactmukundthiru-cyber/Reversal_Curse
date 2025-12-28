@@ -19,8 +19,8 @@ This document provides a comprehensive checklist to ensure full reproducibility 
 
 ```bash
 # Clone repository
-git clone https://github.com/research/reversal-curse.git
-cd reversal-curse
+git clone https://github.com/contactmukundthiru-cyber/Reversal_Curse.git
+cd Reversal_Curse
 
 # Create virtual environment
 python3 -m venv .venv
@@ -405,16 +405,10 @@ All deviations will be clearly documented in the manuscript with justification.
 
 ## 12. Data and Code Availability
 
-Upon publication:
-
-- **Code**: GitHub repository (MIT License)
-- **Data**: Synthetic datasets on OSF
-- **Figures**: High-resolution PDFs on OSF
-- **Supplementary Materials**: Complete analysis scripts
-
-**OSF Project**: [To be created upon acceptance]
-
-**GitHub Repository**: [To be made public upon publication]
+- **Code**: [GitHub repository](https://github.com/contactmukundthiru-cyber/Reversal_Curse) (MIT License)
+- **Data**: Synthetic datasets included in repository
+- **Figures**: Generated via `scripts/run_full_pipeline.py`
+- **Supplementary Materials**: Complete analysis scripts in `scripts/`
 
 ---
 
@@ -422,8 +416,7 @@ Upon publication:
 
 For questions about reproducibility:
 
-- **Email**: research@example.com
-- **GitHub Issues**: https://github.com/research/reversal-curse/issues
+- **GitHub Issues**: https://github.com/contactmukundthiru-cyber/Reversal_Curse/issues
 
 ---
 
@@ -453,17 +446,16 @@ This project follows:
 If you use this code or data, please cite:
 
 ```bibtex
-@article{temporalcreditassignment2025,
+@misc{thiru2025temporal,
   title={Temporal Credit Assignment Shapes the Direction of Knowledge Retrieval},
-  author={[Authors]},
-  journal={Nature Human Behaviour},
+  author={Thiru, Mukund},
   year={2025},
-  note={Code and data: github.com/research/reversal-curse}
+  howpublished={\url{https://github.com/contactmukundthiru-cyber/Reversal_Curse}}
 }
 ```
 
 ---
 
-**Last Updated**: 2025-12-13
+**Last Updated**: 2025-12-28
 
-**Reproducibility Verified**: ✅ All analyses can be reproduced from scratch in <30 minutes.
+**Reproducibility Verified**: All analyses can be reproduced from scratch in <30 minutes.

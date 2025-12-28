@@ -6,11 +6,11 @@
 
 **Subtitle:** Learning Order Determines Inferential Direction Through Predictive Error Signals
 
-**Authors:** [INSERT AUTHOR NAMES AND AFFILIATIONS BEFORE OSF SUBMISSION]
+**Authors:** Mukund Thiru
 
-**Date:** [INSERT DATE BEFORE OSF SUBMISSION]
+**Date:** 2025
 
-**OSF Registration:** [WILL BE ASSIGNED UPON OSF SUBMISSION]
+**OSF Registration:** [To be assigned upon OSF submission]
 
 ---
 

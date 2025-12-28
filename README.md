@@ -2,25 +2,30 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Status: Pre-Data Collection](https://img.shields.io/badge/Status-Pre--Data%20Collection-yellow.svg)]()
+[![Tests](https://img.shields.io/badge/tests-42%20passing-brightgreen.svg)]()
 
-**A research framework investigating how temporal credit assignment shapes the direction of knowledge retrieval.**
+**A research framework investigating how temporal credit assignment shapes the direction of knowledge retrieval in human associative learning.**
 
-## Project Status
+## Overview
 
-> **IMPORTANT**: This project is in the **pre-data collection phase**. The experimental platform is functional, but **no real participant data has been collected yet**. All analyses require real data from actual experimental participants.
+This project provides a complete experimental platform and analysis pipeline for studying the "reversal curse" phenomenon in human learning. The core hypothesis is that **temporal credit assignment** creates directional asymmetries in associative memory: learning that A predicts B does not automatically enable retrieval of A given B.
 
-### What's Ready
-- Experimental platform (Flask-based web experiment)
-- Pre-registration document with hypotheses and analysis plan
-- Statistical analysis pipelines
-- Stimulus generation (SVG symbols, pronounceable nonwords)
-- Data collection infrastructure
+### Key Features
 
-### What's Needed Before Running the Experiment
+- Complete Flask-based web experiment platform
+- Pre-registration document with 8 formal hypotheses
+- Rigorous statistical analysis pipelines (TOST, GEE, bootstrapped CIs)
+- Procedural stimulus generation (SVG symbols, pronounceable nonwords)
+- Computational modeling for theory validation
+- Secure, production-ready data collection infrastructure
+
+### Project Status
+
+This repository contains the complete experimental infrastructure. Before running with human participants:
+
 1. **IRB/Ethics Approval** - Required for human subjects research
-2. **Participant Recruitment** - Via Prolific or similar platform
-3. **Pilot Testing** - Verify timing and instructions work correctly
+2. **Participant Recruitment** - Configure Prolific or similar platform
+3. **Pilot Testing** - Validate timing and instructions
 
 ## The Core Hypothesis
 
@@ -62,8 +67,8 @@ This is a **causal manipulation** that reverses the direction of asymmetry while
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/reversal-curse.git
-cd reversal-curse
+git clone https://github.com/contactmukundthiru-cyber/Reversal_Curse.git
+cd Reversal_Curse
 
 # Create virtual environment
 python -m venv .venv
@@ -71,6 +76,9 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Run tests to verify installation
+pytest tests/ -v
 ```
 
 ### Running the Experiment Locally
@@ -209,14 +217,15 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Citation
 
 ```bibtex
-@misc{temporalcreditassignment2025,
+@misc{thiru2025temporal,
   title={Temporal Credit Assignment Shapes the Direction of Knowledge Retrieval},
-  author={[Authors]},
+  author={Thiru, Mukund},
   year={2025},
+  howpublished={\url{https://github.com/contactmukundthiru-cyber/Reversal_Curse}},
   note={Pre-registration and experimental platform}
 }
 ```
 
 ## Contact
 
-For questions about this research, please open an issue on GitHub.
+For questions about this research, please open an issue on [GitHub](https://github.com/contactmukundthiru-cyber/Reversal_Curse/issues).
