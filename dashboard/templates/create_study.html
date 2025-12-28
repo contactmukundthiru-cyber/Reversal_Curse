@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Create Study - Reversal Curse{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-0">Create New Study</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Study Name *</label>
+                        <input type="text" name="name" class="form-control" required
+                               placeholder="e.g., Reversal Curse Study v1.0">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"
+                                  placeholder="Brief description of this study configuration"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Number of Symbol-Label Pairs</label>
+                        <input type="number" name="n_pairs" class="form-control" value="16" min="4" max="32">
+                        <small class="text-muted">Default: 16 pairs</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Training Repetitions</label>
+                        <input type="number" name="training_reps" class="form-control" value="6" min="1" max="12">
+                        <small class="text-muted">Times each pair is shown during training</small>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Target N per Condition</label>
+                        <input type="number" name="target_n" class="form-control" value="60" min="10" max="500">
+                        <small class="text-muted">Target participants per condition</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Payment (USD)</label>
+                        <input type="number" name="payment" class="form-control" value="2.50" step="0.25" min="0">
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_active" class="form-check-input" id="is_active">
+                            <label class="form-check-label" for="is_active">
+                                Set as active study
+                            </label>
+                        </div>
+                        <small class="text-muted">Only one study can be active at a time</small>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ url_for('studies') }}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Study</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

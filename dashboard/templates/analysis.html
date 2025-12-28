@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis - Reversal Curse{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Analysis Results</h1>
+    <div>
+        <a href="{{ url_for('export_csv') }}" class="btn btn-outline-primary">
+            <i class="bi bi-download"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+{% if results %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card primary">
+            <h2>{{ results.total_participants }}</h2>
+            <div class="label">Total Participants</div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card mb-4">
+    <div class="card-header">Results by Condition</div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Condition</th>
+                    <th>N</th>
+                    <th>Forward Accuracy</th>
+                    <th>Reverse Accuracy</th>
+                    <th>Asymmetry</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for condition, stats in results.by_condition.items() %}
+                <tr>
+                    <td>
+                        {% if condition == 'A_then_B' %}
+                            <span class="badge badge-condition badge-a-then-b">A-then-B</span>
+                        {% elif condition == 'B_then_A' %}
+                            <span class="badge badge-condition badge-b-then-a">B-then-A</span>
+                        {% else %}
+                            <span class="badge badge-condition badge-simultaneous">Simultaneous</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ stats.n }}</td>
+                    <td>{{ "%.1f"|format(stats.forward_accuracy * 100) }}%</td>
+                    <td>{{ "%.1f"|format(stats.reverse_accuracy * 100) }}%</td>
+                    <td class="{% if stats.asymmetry > 0 %}text-primary{% elif stats.asymmetry < 0 %}text-danger{% endif %}">
+                        {{ "%+.1f"|format(stats.asymmetry * 100) }}pp
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Visualization -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Accuracy Comparison</div>
+            <div class="card-body">
+                <canvas id="analysisChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Key Findings</div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    {% if results.by_condition.A_then_B.asymmetry > 0 %}
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle text-success"></i>
+                        A-then-B shows forward advantage
+                    </li>
+                    {% endif %}
+                    {% if results.by_condition.B_then_A.asymmetry < 0 %}
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle text-success"></i>
+                        B-then-A shows reverse advantage (THE FLIP)
+                    </li>
+                    {% endif %}
+                    {% if results.by_condition.simultaneous.asymmetry|abs < 0.1 %}
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Simultaneous shows no asymmetry
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No completed sessions yet. Data will appear here once participants complete the experiment.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if results %}
+<script>
+const ctx = document.getElementById('analysisChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['A-then-B', 'B-then-A', 'Simultaneous'],
+        datasets: [
+            {
+                label: 'Forward',
+                data: [
+                    {{ results.by_condition.A_then_B.forward_accuracy * 100 if 'A_then_B' in results.by_condition else 0 }},
+                    {{ results.by_condition.B_then_A.forward_accuracy * 100 if 'B_then_A' in results.by_condition else 0 }},
+                    {{ results.by_condition.simultaneous.forward_accuracy * 100 if 'simultaneous' in results.by_condition else 0 }}
+                ],
+                backgroundColor: '#2166AC',
+            },
+            {
+                label: 'Reverse',
+                data: [
+                    {{ results.by_condition.A_then_B.reverse_accuracy * 100 if 'A_then_B' in results.by_condition else 0 }},
+                    {{ results.by_condition.B_then_A.reverse_accuracy * 100 if 'B_then_A' in results.by_condition else 0 }},
+                    {{ results.by_condition.simultaneous.reverse_accuracy * 100 if 'simultaneous' in results.by_condition else 0 }}
+                ],
+                backgroundColor: '#B2182B',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                    display: true,
+                    text: 'Accuracy (%)'
+                }
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

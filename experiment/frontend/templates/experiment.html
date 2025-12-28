@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Study</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="experiment-container">
+        <!-- Instructions Screen -->
+        <div id="instructions-screen" class="screen active">
+            <div class="instructions-content">
+                <h2>Instructions</h2>
+                <div id="condition-instructions"></div>
+                <button id="start-training-btn" class="btn btn-primary">Begin Training</button>
+            </div>
+        </div>
+
+        <!-- Training Screen -->
+        <div id="training-screen" class="screen">
+            <div class="trial-display">
+                <div id="fixation" class="fixation">+</div>
+                <div id="stimulus-display" class="stimulus-display"></div>
+                <div id="label-display" class="label-display"></div>
+            </div>
+            <div class="progress-bar">
+                <div id="training-progress" class="progress-fill"></div>
+            </div>
+            <div id="training-info" class="trial-info"></div>
+        </div>
+
+        <!-- Criterion Check Screen -->
+        <div id="criterion-screen" class="screen">
+            <div class="criterion-content">
+                <h2>Quick Check</h2>
+                <p>Let's make sure you've learned the pairs. Type the label for each symbol.</p>
+                <div id="criterion-stimulus" class="stimulus-display"></div>
+                <input type="text" id="criterion-input" class="text-input" placeholder="Type the label..." autocomplete="off">
+                <div id="criterion-feedback" class="feedback"></div>
+            </div>
+        </div>
+
+        <!-- Distractor Screen -->
+        <div id="distractor-screen" class="screen">
+            <div class="distractor-content">
+                <h2>Short Break</h2>
+                <p>Please solve these simple math problems:</p>
+                <div id="math-problem" class="math-problem"></div>
+                <input type="text" id="math-input" class="text-input" placeholder="Your answer..." autocomplete="off">
+                <button id="math-submit" class="btn btn-secondary">Submit</button>
+                <div id="math-feedback" class="feedback"></div>
+                <div id="distractor-timer" class="timer"></div>
+            </div>
+        </div>
+
+        <!-- Test Screen -->
+        <div id="test-screen" class="screen">
+            <div class="test-content">
+                <!-- Forward Test (4-AFC: symbol cue, select label) -->
+                <div id="forward-test" class="test-trial">
+                    <div id="test-stimulus" class="stimulus-display"></div>
+                    <p class="test-prompt">Which label goes with this symbol?</p>
+                    <div id="forward-options" class="options-grid label-options"></div>
+                </div>
+
+                <!-- Reverse Test (4-AFC: label cue, select symbol) -->
+                <div id="reverse-test" class="test-trial" style="display: none;">
+                    <div id="test-label" class="label-display-large"></div>
+                    <p class="test-prompt">Which symbol goes with this label?</p>
+                    <div id="reverse-options" class="options-grid symbol-options"></div>
+                </div>
+
+                <!-- Confidence Rating (shown after each response) -->
+                <div id="confidence-rating" class="confidence-section" style="display: none;">
+                    <p class="confidence-prompt">How confident are you in your answer?</p>
+                    <div class="confidence-buttons">
+                        <button type="button" class="confidence-btn" data-value="1">1<br><span>Not at all</span></button>
+                        <button type="button" class="confidence-btn" data-value="2">2</button>
+                        <button type="button" class="confidence-btn" data-value="3">3</button>
+                        <button type="button" class="confidence-btn" data-value="4">4</button>
+                        <button type="button" class="confidence-btn" data-value="5">5<br><span>Very</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div id="test-progress" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Survey Screen -->
+        <div id="survey-screen" class="screen">
+            <div class="survey-content">
+                <h2>A Few Questions</h2>
+
+                <div class="survey-section">
+                    <h3>Attention Check</h3>
+                    <p>To verify you're paying attention, please select "Strongly Agree" below:</p>
+                    <div class="radio-group" id="attention-check">
+                        <label><input type="radio" name="attention" value="1"> Strongly Disagree</label>
+                        <label><input type="radio" name="attention" value="2"> Disagree</label>
+                        <label><input type="radio" name="attention" value="3"> Neutral</label>
+                        <label><input type="radio" name="attention" value="4"> Agree</label>
+                        <label><input type="radio" name="attention" value="5"> Strongly Agree</label>
+                    </div>
+                </div>
+
+                <div class="survey-section">
+                    <h3>Demographics</h3>
+
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" class="text-input short" min="18" max="100">
+
+                    <label for="gender">Gender:</label>
+                    <select id="gender" class="select-input">
+                        <option value="">Select...</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="non-binary">Non-binary</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not">Prefer not to say</option>
+                    </select>
+
+                    <label for="education">Highest Education:</label>
+                    <select id="education" class="select-input">
+                        <option value="">Select...</option>
+                        <option value="high-school">High School</option>
+                        <option value="some-college">Some College</option>
+                        <option value="bachelors">Bachelor's Degree</option>
+                        <option value="masters">Master's Degree</option>
+                        <option value="doctorate">Doctorate</option>
+                        <option value="other">Other</option>
+                    </select>
+
+                    <label for="native-language">Native Language:</label>
+                    <input type="text" id="native-language" class="text-input">
+                </div>
+
+                <div class="survey-section">
+                    <h3>Study Questions</h3>
+
+                    <label for="strategy">How did you try to remember the symbol-label pairs?</label>
+                    <textarea id="strategy" class="textarea-input" rows="3"></textarea>
+
+                    <label for="suspicion">What do you think this study was about?</label>
+                    <textarea id="suspicion" class="textarea-input" rows="3"></textarea>
+
+                    <label for="comments">Any additional comments?</label>
+                    <textarea id="comments" class="textarea-input" rows="2"></textarea>
+                </div>
+
+                <button id="submit-survey" class="btn btn-primary">Complete Study</button>
+            </div>
+        </div>
+
+        <!-- Complete Screen -->
+        <div id="complete-screen" class="screen">
+            <div class="complete-content">
+                <h2>Study Complete!</h2>
+                <p>Thank you for your participation.</p>
+                <div id="completion-code" class="completion-code"></div>
+                <p class="completion-instructions">
+                    Please copy this code and return to Prolific to complete your submission.
+                </p>
+                <a id="prolific-return" class="btn btn-primary" href="#">Return to Prolific</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/experiment.js') }}"></script>
+</body>
+</html>

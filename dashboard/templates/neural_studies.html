@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Studies - Reversal Curse Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar { min-height: 100vh; background: #2D3E50; }
+        .sidebar a { color: rgba(255,255,255,0.8); }
+        .sidebar a:hover { color: #fff; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        .modality-card { border-left: 4px solid; }
+        .modality-card.fmri { border-color: #7570B3; }
+        .modality-card.eeg { border-color: #D95F02; }
+        .brain-region { padding: 0.5rem 1rem; margin: 0.25rem; background: #f8f9fa; border-radius: 0.25rem; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block sidebar py-3">
+                <h5 class="text-white mb-4">Reversal Curse</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('studies') }}">Studies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('longitudinal_studies') }}">Longitudinal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('intervention_studies') }}">Intervention</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('domain_studies') }}">Domain Studies</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="{{ url_for('neural_studies') }}">Neural</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('analysis') }}">Analysis</a></li>
+                    <li class="nav-item mt-4"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto px-4 py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Neural Correlates Studies</h2>
+                    <span class="badge bg-purple" style="background: #7570B3;">Neuroimaging</span>
+                </div>
+
+                <p class="text-muted mb-4">
+                    Neural correlates studies use fMRI and EEG to identify brain signatures of knowledge
+                    restructuring during reversals. This provides mechanistic understanding of the curse.
+                </p>
+
+                <!-- Modality Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card modality-card fmri h-100">
+                            <div class="card-header" style="background: #7570B3; color: white;">
+                                <h5 class="mb-0">fMRI Studies</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="h3">{{ n_fmri }}</span>
+                                    <span class="text-muted">Sessions</span>
+                                </div>
+                                <p class="text-muted">
+                                    High spatial resolution imaging of brain activity during knowledge updating.
+                                </p>
+                                <hr>
+                                <h6>Recent Sessions</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Participant</th>
+                                                <th>Run</th>
+                                                <th>Events</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in fmri_sessions[:5] %}
+                                            <tr>
+                                                <td><code>{{ (session.participant_id or session.session_uuid)[:8] }}</code></td>
+                                                <td>{{ session.run_number }}</td>
+                                                <td>{{ session.n_events }}</td>
+                                                <td>
+                                                    {% if session.completed %}
+                                                    <span class="badge bg-success">Done</span>
+                                                    {% else %}
+                                                    <span class="badge bg-warning">In Progress</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            {% if not fmri_sessions %}
+                                            <tr><td colspan="4" class="text-muted">No fMRI sessions yet</td></tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card modality-card eeg h-100">
+                            <div class="card-header" style="background: #D95F02; color: white;">
+                                <h5 class="mb-0">EEG Studies</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="h3">{{ n_eeg }}</span>
+                                    <span class="text-muted">Sessions</span>
+                                </div>
+                                <p class="text-muted">
+                                    High temporal resolution measurement of neural oscillations and ERPs.
+                                </p>
+                                <hr>
+                                <h6>Recent Sessions</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Participant</th>
+                                                <th>Run</th>
+                                                <th>Events</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in eeg_sessions[:5] %}
+                                            <tr>
+                                                <td><code>{{ (session.participant_id or session.session_uuid)[:8] }}</code></td>
+                                                <td>{{ session.run_number }}</td>
+                                                <td>{{ session.n_events }}</td>
+                                                <td>
+                                                    {% if session.completed %}
+                                                    <span class="badge bg-success">Done</span>
+                                                    {% else %}
+                                                    <span class="badge bg-warning">In Progress</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            {% if not eeg_sessions %}
+                                            <tr><td colspan="4" class="text-muted">No EEG sessions yet</td></tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hypothesis Regions -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Hypothesis Brain Regions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Primary ROIs</h6>
+                                <div class="brain-region">
+                                    <strong>ACC</strong>
+                                    <small class="text-muted d-block">Conflict monitoring</small>
+                                </div>
+                                <div class="brain-region">
+                                    <strong>VMPFC</strong>
+                                    <small class="text-muted d-block">Belief updating</small>
+                                </div>
+                                <div class="brain-region">
+                                    <strong>TPJ (R)</strong>
+                                    <small class="text-muted d-block">Theory of mind</small>
+                                </div>
+                                <div class="brain-region">
+                                    <strong>Hippocampus</strong>
+                                    <small class="text-muted d-block">Memory restructuring</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Secondary ROIs</h6>
+                                <div class="brain-region">
+                                    <strong>DLPFC</strong>
+                                    <small class="text-muted d-block">Executive control</small>
+                                </div>
+                                <div class="brain-region">
+                                    <strong>Precuneus</strong>
+                                    <small class="text-muted d-block">Self-reflection</small>
+                                </div>
+                                <div class="brain-region">
+                                    <strong>ATL</strong>
+                                    <small class="text-muted d-block">Semantic memory</small>
+                                </div>
+                                <div class="brain-region">
+                                    <strong>Insula</strong>
+                                    <small class="text-muted d-block">Uncertainty</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ERP Components -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">EEG Components of Interest</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>P300 (300-500ms)</h6>
+                                        <p class="small text-muted mb-0">
+                                            Context updating component. Expected to be larger for reversals,
+                                            indicating increased updating demand.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>N400 (350-500ms)</h6>
+                                        <p class="small text-muted mb-0">
+                                            Semantic processing component. Enhanced N400 indicates semantic
+                                            conflict during reversal processing.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>Frontal Theta (4-8Hz)</h6>
+                                        <p class="small text-muted mb-0">
+                                            Cognitive control oscillations. Increased theta power expected
+                                            during effortful knowledge restructuring.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Hypotheses -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Pre-registered Hypotheses</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Hypothesis</th>
+                                    <th>Analysis</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-primary">H1</span></td>
+                                    <td>ACC activation greater for reversal vs. consistent trials</td>
+                                    <td>Paired t-test on ROI betas</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-primary">H2</span></td>
+                                    <td>VMPFC shows differential activation during reversal</td>
+                                    <td>Paired t-test on ROI betas</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-primary">H3</span></td>
+                                    <td>TPJ activation predicts subsequent ToM performance</td>
+                                    <td>Correlation with behavioral accuracy</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-primary">H4</span></td>
+                                    <td>Hippocampal activation correlates with successful updating</td>
+                                    <td>Correlation with accuracy improvement</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-secondary">H5</span></td>
+                                    <td>Frontal theta enhanced during reversal processing</td>
+                                    <td>Paired t-test on theta power</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

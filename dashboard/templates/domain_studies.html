@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Studies - Reversal Curse Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar { min-height: 100vh; background: #2D3E50; }
+        .sidebar a { color: rgba(255,255,255,0.8); }
+        .sidebar a:hover { color: #fff; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        .domain-card { border-left: 4px solid; }
+        .domain-card.medical { border-color: #D73027; }
+        .domain-card.climate { border-color: #4575B4; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block sidebar py-3">
+                <h5 class="text-white mb-4">Reversal Curse</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('studies') }}">Studies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('longitudinal_studies') }}">Longitudinal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('intervention_studies') }}">Intervention</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="{{ url_for('domain_studies') }}">Domain Studies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('neural_studies') }}">Neural</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('analysis') }}">Analysis</a></li>
+                    <li class="nav-item mt-4"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto px-4 py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Domain-Specific Studies</h2>
+                    <span class="badge bg-info">High-Stakes Domains</span>
+                </div>
+
+                <p class="text-muted mb-4">
+                    Real-world domain studies examine the reversal curse in high-stakes contexts where
+                    knowledge reversals have significant practical implications.
+                </p>
+
+                <!-- Domain Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card domain-card medical h-100">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">Medical Domain</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="h3">{{ medical_sessions }}</span>
+                                    <span class="text-muted">Sessions</span>
+                                </div>
+                                <p class="text-muted">
+                                    Studies how treatment guideline changes affect physician-patient
+                                    communication and patient outcomes.
+                                </p>
+                                <hr>
+                                <h6>Guideline Changes Studied</h6>
+                                <ul class="list-unstyled">
+                                    {% for guideline, data in medical_summary.items() %}
+                                    <li class="mb-2">
+                                        <strong>{{ guideline }}</strong>
+                                        <span class="badge bg-secondary ms-2">n={{ data.n }}</span>
+                                    </li>
+                                    {% endfor %}
+                                    {% if not medical_summary %}
+                                    <li class="text-muted">No medical studies yet</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    Examples: HRT reversal (2002), Aspirin guidelines (2019), PSA screening changes
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card domain-card climate h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Climate Science Domain</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="h3">{{ climate_sessions }}</span>
+                                    <span class="text-muted">Sessions</span>
+                                </div>
+                                <p class="text-muted">
+                                    Studies how climate projection updates affect public understanding
+                                    and scientist credibility.
+                                </p>
+                                <hr>
+                                <h6>Projection Updates Studied</h6>
+                                <ul class="list-unstyled">
+                                    {% for update, data in climate_summary.items() %}
+                                    <li class="mb-2">
+                                        <strong>{{ update }}</strong>
+                                        <span class="badge bg-secondary ms-2">n={{ data.n }}</span>
+                                    </li>
+                                    {% endfor %}
+                                    {% if not climate_summary %}
+                                    <li class="text-muted">No climate studies yet</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    Examples: Sea level projections (AR6), Arctic ice forecasts, Carbon budget updates
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research Questions -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Key Research Questions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-danger">Medical Domain</h6>
+                                <ul>
+                                    <li>How do physicians communicate guideline changes to patients?</li>
+                                    <li>Does the reversal curse affect shared decision-making?</li>
+                                    <li>What interventions improve post-reversal patient education?</li>
+                                    <li>How does guideline reversal duration affect curse magnitude?</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Climate Domain</h6>
+                                <ul>
+                                    <li>How do scientists communicate updated projections?</li>
+                                    <li>Does updating projections undermine public trust?</li>
+                                    <li>What communication strategies reduce confusion?</li>
+                                    <li>How does projection direction (worse vs. better) affect the curse?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Design -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Study Design Framework</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>Phase 1: Baseline</h6>
+                                        <p class="small text-muted mb-0">
+                                            Measure existing knowledge and beliefs about the domain topic
+                                            before presenting the reversal.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>Phase 2: Reversal</h6>
+                                        <p class="small text-muted mb-0">
+                                            Present the knowledge reversal (guideline change or projection update)
+                                            with varying communication strategies.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>Phase 3: Assessment</h6>
+                                        <p class="small text-muted mb-0">
+                                            Measure confusion, trust, behavioral intent, and knowledge retention
+                                            at multiple follow-up points.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

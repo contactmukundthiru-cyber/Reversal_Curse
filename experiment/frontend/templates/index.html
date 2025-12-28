@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory and Learning Study</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div id="consent-screen" class="screen active">
+            <h1>Memory and Learning Study</h1>
+
+            <div class="consent-box">
+                <h2>Information Sheet and Consent</h2>
+
+                <div class="consent-content">
+                    <h3>Purpose of the Study</h3>
+                    <p>This study investigates how people learn and remember associations between symbols and labels. Your participation will help us understand fundamental aspects of human memory.</p>
+
+                    <h3>What You Will Do</h3>
+                    <ul>
+                        <li>Learn to associate abstract symbols with pronounceable labels</li>
+                        <li>Complete a brief training phase (~6 minutes)</li>
+                        <li>Take a short memory test (~3 minutes)</li>
+                        <li>Answer a few demographic questions</li>
+                    </ul>
+
+                    <h3>Duration and Compensation</h3>
+                    <p>This study takes approximately <strong>12 minutes</strong> to complete. You will receive <strong>$2.50</strong> for your participation.</p>
+
+                    <h3>Risks and Benefits</h3>
+                    <p>There are no known risks beyond those of everyday life. While there are no direct benefits to you, your participation contributes to scientific research on memory and learning.</p>
+
+                    <h3>Confidentiality</h3>
+                    <p>Your responses will be kept confidential and stored securely. Your Prolific ID will be used only to process payment and will not be associated with your responses in any publications.</p>
+
+                    <h3>Voluntary Participation</h3>
+                    <p>Your participation is voluntary. You may withdraw at any time by closing your browser, though compensation requires completion.</p>
+
+                    <h3>Contact Information</h3>
+                    <p>If you have questions about this research, please contact the research team at research@example.com.</p>
+                </div>
+
+                <div class="consent-agreement">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="consent-checkbox">
+                        <span class="checkmark"></span>
+                        I have read and understood the information above. I am at least 18 years old and agree to participate in this study.
+                    </label>
+                </div>
+
+                <button id="consent-button" class="btn btn-primary" disabled>
+                    Continue to Study
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get Prolific parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const prolificPid = urlParams.get('PROLIFIC_PID');
+        const studyId = urlParams.get('STUDY_ID');
+        const sessionId = urlParams.get('SESSION_ID');
+
+        // Enable consent button when checkbox is checked
+        const consentCheckbox = document.getElementById('consent-checkbox');
+        const consentButton = document.getElementById('consent-button');
+
+        consentCheckbox.addEventListener('change', function() {
+            consentButton.disabled = !this.checked;
+        });
+
+        // Handle consent
+        consentButton.addEventListener('click', async function() {
+            if (!consentCheckbox.checked) return;
+
+            try {
+                const response = await fetch('/api/start-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prolific_pid: prolificPid,
+                        study_id: studyId,
+                        session_id: sessionId,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store session info and redirect to experiment
+                    sessionStorage.setItem('session_uuid', data.session_uuid);
+                    sessionStorage.setItem('condition', data.condition);
+                    sessionStorage.setItem('config', JSON.stringify(data.config));
+                    sessionStorage.setItem('stimuli', JSON.stringify(data.stimuli));
+
+                    window.location.href = '/experiment';
+                } else {
+                    alert('Error starting session. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error starting session. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

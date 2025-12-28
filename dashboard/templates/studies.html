@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Studies - Reversal Curse{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Study Configurations</h1>
+    <a href="{{ url_for('create_study') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> New Study
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Pairs</th>
+                    <th>Target N</th>
+                    <th>Progress</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for config in configs %}
+                <tr>
+                    <td>
+                        <strong>{{ config.name }}</strong>
+                    </td>
+                    <td>{{ config.description or '—' }}</td>
+                    <td>
+                        {% if config.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ config.n_symbol_label_pairs }}</td>
+                    <td>{{ config.target_n_per_condition }} / condition</td>
+                    <td>
+                        {% set counts = config.get_condition_counts() %}
+                        {% set total = counts.values()|sum %}
+                        {% set target = config.target_n_per_condition * 3 %}
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar" style="width: {{ (total / target * 100)|int }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ total }} / {{ target }}</small>
+                    </td>
+                    <td>
+                        {% if not config.is_active %}
+                        <form action="{{ url_for('activate_study', config_id=config.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Activate</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

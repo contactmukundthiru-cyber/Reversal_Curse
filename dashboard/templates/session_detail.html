@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Session Details - Reversal Curse{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Session Details</h1>
+        <small class="text-muted">{{ session.session_uuid }}</small>
+    </div>
+    <a href="{{ url_for('sessions') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Sessions
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Results Card -->
+        <div class="card mb-4">
+            <div class="card-header">Test Results</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="h2 mb-0" style="color: #2166AC;">{{ "%.1f"|format(session.forward_accuracy * 100) }}%</div>
+                        <div class="text-muted">Forward Accuracy</div>
+                        <small class="text-muted">{{ session.forward_correct }} / {{ session.forward_total }} correct</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h2 mb-0" style="color: #B2182B;">{{ "%.1f"|format(session.reverse_accuracy * 100) }}%</div>
+                        <div class="text-muted">Reverse Accuracy</div>
+                        <small class="text-muted">{{ session.reverse_correct }} / {{ session.reverse_total }} correct</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h2 mb-0 {% if session.asymmetry > 0 %}text-primary{% elif session.asymmetry < 0 %}text-danger{% endif %}">
+                            {{ "%+.1f"|format(session.asymmetry * 100) }}pp
+                        </div>
+                        <div class="text-muted">Asymmetry</div>
+                        <small class="text-muted">Forward - Reverse</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trial Data -->
+        <div class="card">
+            <div class="card-header">Trial Data</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Phase</th>
+                            <th>Direction</th>
+                            <th>Symbol</th>
+                            <th>Response</th>
+                            <th>Correct</th>
+                            <th>RT (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trial in session.trials %}
+                        <tr>
+                            <td>{{ trial.trial_number + 1 }}</td>
+                            <td>{{ trial.phase }}</td>
+                            <td>{{ trial.test_direction or '—' }}</td>
+                            <td>{{ trial.symbol_id }}</td>
+                            <td>{{ trial.response or '—' }}</td>
+                            <td>
+                                {% if trial.correct is not none %}
+                                    {% if trial.correct %}
+                                        <i class="bi bi-check-circle text-success"></i>
+                                    {% else %}
+                                        <i class="bi bi-x-circle text-danger"></i>
+                                    {% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>{{ trial.response_time_ms or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Session Info -->
+        <div class="card mb-4">
+            <div class="card-header">Session Info</div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>Condition</dt>
+                    <dd>
+                        {% if session.condition == 'A_then_B' %}
+                            <span class="badge badge-condition badge-a-then-b">A-then-B</span>
+                        {% elif session.condition == 'B_then_A' %}
+                            <span class="badge badge-condition badge-b-then-a">B-then-A</span>
+                        {% else %}
+                            <span class="badge badge-condition badge-simultaneous">Simultaneous</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Status</dt>
+                    <dd>
+                        {% if session.completed %}
+                            <span class="badge bg-success">Complete</span>
+                        {% else %}
+                            <span class="badge bg-warning">{{ session.current_phase }}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Started</dt>
+                    <dd>{{ session.started_at.strftime('%Y-%m-%d %H:%M:%S') if session.started_at else '—' }}</dd>
+
+                    <dt>Completed</dt>
+                    <dd>{{ session.completed_at.strftime('%Y-%m-%d %H:%M:%S') if session.completed_at else '—' }}</dd>
+
+                    <dt>Duration</dt>
+                    <dd>{{ "%.1f"|format(session.duration_seconds / 60) if session.duration_seconds else '—' }} minutes</dd>
+
+                    <dt>Attention Check</dt>
+                    <dd>
+                        {% if session.attention_check_passed %}
+                            <span class="badge bg-success">Passed</span>
+                        {% elif session.attention_check_passed is none %}
+                            <span class="badge bg-secondary">Not taken</span>
+                        {% else %}
+                            <span class="badge bg-danger">Failed</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Training Info -->
+        <div class="card">
+            <div class="card-header">Training Info</div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>Training Completed</dt>
+                    <dd>{{ 'Yes' if session.training_completed else 'No' }}</dd>
+
+                    <dt>Criterion Met</dt>
+                    <dd>{{ 'Yes' if session.criterion_met else 'No' }}</dd>
+
+                    <dt>Training Attempts</dt>
+                    <dd>{{ session.training_attempts or 1 }}</dd>
+
+                    <dt>Trials to Criterion</dt>
+                    <dd>{{ session.trials_to_criterion or '—' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

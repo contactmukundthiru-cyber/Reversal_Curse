@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Reversal Curse{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Dashboard</h1>
+    <span class="text-muted" id="last-updated">Last updated: now</span>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card primary">
+            <h2>{{ total_sessions }}</h2>
+            <div class="label">Total Sessions</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card success">
+            <h2>{{ completed_sessions }}</h2>
+            <div class="label">Completed Sessions</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h2>{{ active_configs }}</h2>
+            <div class="label">Active Studies</div>
+        </div>
+    </div>
+</div>
+
+<!-- Condition Statistics -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Results by Condition</span>
+                <a href="{{ url_for('analysis') }}" class="btn btn-sm btn-outline-primary">Full Analysis</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for condition, stats in condition_stats.items() %}
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded mb-3">
+                            <h6 class="text-muted mb-3">
+                                {% if condition == 'A_then_B' %}
+                                    <span class="badge badge-condition badge-a-then-b">A-then-B</span>
+                                {% elif condition == 'B_then_A' %}
+                                    <span class="badge badge-condition badge-b-then-a">B-then-A</span>
+                                {% else %}
+                                    <span class="badge badge-condition badge-simultaneous">Simultaneous</span>
+                                {% endif %}
+                            </h6>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="h4 mb-0" style="color: #2166AC;">{{ "%.1f"|format(stats.forward_accuracy * 100) }}%</div>
+                                    <small class="text-muted">Forward</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h4 mb-0" style="color: #B2182B;">{{ "%.1f"|format(stats.reverse_accuracy * 100) }}%</div>
+                                    <small class="text-muted">Reverse</small>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <span class="h5 {% if stats.asymmetry > 0 %}text-primary{% elif stats.asymmetry < 0 %}text-danger{% endif %}">
+                                    {{ "%+.1f"|format(stats.asymmetry * 100) }}pp
+                                </span>
+                                <div class="small text-muted">Asymmetry</div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <span class="badge bg-secondary">n = {{ stats.n }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Accuracy by Condition</div>
+            <div class="card-body">
+                <canvas id="accuracyChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Asymmetry Scores</div>
+            <div class="card-body">
+                <canvas id="asymmetryChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Sessions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Recent Sessions</span>
+                <a href="{{ url_for('sessions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Session ID</th>
+                            <th>Condition</th>
+                            <th>Forward</th>
+                            <th>Reverse</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in recent_sessions %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('session_detail', session_id=session.id) }}">
+                                    {{ session.session_uuid[:8] }}...
+                                </a>
+                            </td>
+                            <td>
+                                {% if session.condition == 'A_then_B' %}
+                                    <span class="badge badge-condition badge-a-then-b">A-then-B</span>
+                                {% elif session.condition == 'B_then_A' %}
+                                    <span class="badge badge-condition badge-b-then-a">B-then-A</span>
+                                {% else %}
+                                    <span class="badge badge-condition badge-simultaneous">Simul.</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.0f"|format(session.forward_accuracy * 100) }}%</td>
+                            <td>{{ "%.0f"|format(session.reverse_accuracy * 100) }}%</td>
+                            <td>
+                                {% if session.completed %}
+                                    <span class="badge bg-success">Complete</span>
+                                {% else %}
+                                    <span class="badge bg-warning">In Progress</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ session.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Accuracy Chart
+const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
+new Chart(accuracyCtx, {
+    type: 'bar',
+    data: {
+        labels: ['A-then-B', 'B-then-A', 'Simultaneous'],
+        datasets: [
+            {
+                label: 'Forward (A→B)',
+                data: [
+                    {{ condition_stats.A_then_B.forward_accuracy * 100 }},
+                    {{ condition_stats.B_then_A.forward_accuracy * 100 }},
+                    {{ condition_stats.simultaneous.forward_accuracy * 100 }}
+                ],
+                backgroundColor: '#2166AC',
+            },
+            {
+                label: 'Reverse (B→A)',
+                data: [
+                    {{ condition_stats.A_then_B.reverse_accuracy * 100 }},
+                    {{ condition_stats.B_then_A.reverse_accuracy * 100 }},
+                    {{ condition_stats.simultaneous.reverse_accuracy * 100 }}
+                ],
+                backgroundColor: '#B2182B',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                    display: true,
+                    text: 'Accuracy (%)'
+                }
+            }
+        }
+    }
+});
+
+// Asymmetry Chart
+const asymmetryCtx = document.getElementById('asymmetryChart').getContext('2d');
+new Chart(asymmetryCtx, {
+    type: 'bar',
+    data: {
+        labels: ['A-then-B', 'B-then-A', 'Simultaneous'],
+        datasets: [{
+            label: 'Asymmetry',
+            data: [
+                {{ condition_stats.A_then_B.asymmetry * 100 }},
+                {{ condition_stats.B_then_A.asymmetry * 100 }},
+                {{ condition_stats.simultaneous.asymmetry * 100 }}
+            ],
+            backgroundColor: [
+                '#2166AC',
+                '#B2182B',
+                '#4DAF4A'
+            ],
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'y',
+        scales: {
+            x: {
+                min: -60,
+                max: 60,
+                title: {
+                    display: true,
+                    text: 'Asymmetry (pp)'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Auto-refresh stats
+setInterval(() => {
+    fetch('/api/dashboard-stats')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('last-updated').textContent =
+                'Last updated: ' + new Date(data.timestamp).toLocaleTimeString();
+        });
+}, 30000);
+</script>
+{% endblock %}

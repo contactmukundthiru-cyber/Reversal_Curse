@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervention Studies - Reversal Curse Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar { min-height: 100vh; background: #2D3E50; }
+        .sidebar a { color: rgba(255,255,255,0.8); }
+        .sidebar a:hover { color: #fff; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        .stat-card { border-left: 4px solid; }
+        .stat-card.intervention { border-color: #1A9850; }
+        .stat-card.control { border-color: #B2182B; }
+        .stat-card.effect { border-color: #2166AC; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block sidebar py-3">
+                <h5 class="text-white mb-4">Reversal Curse</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('studies') }}">Studies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('longitudinal_studies') }}">Longitudinal</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="{{ url_for('intervention_studies') }}">Intervention</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('domain_studies') }}">Domain Studies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('neural_studies') }}">Neural</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('analysis') }}">Analysis</a></li>
+                    <li class="nav-item mt-4"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto px-4 py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Intervention Studies</h2>
+                    <span class="badge bg-success">Cognitive Scaffolding</span>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card intervention">
+                            <div class="card-body">
+                                <h6 class="text-muted">Intervention Group</h6>
+                                <h2 class="mb-0">{{ summary.intervention.n }}</h2>
+                                <small>Mean Asymmetry: {{ "%.3f"|format(summary.intervention.mean_asymmetry) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card control">
+                            <div class="card-body">
+                                <h6 class="text-muted">Control Group</h6>
+                                <h2 class="mb-0">{{ summary.control.n }}</h2>
+                                <small>Mean Asymmetry: {{ "%.3f"|format(summary.control.mean_asymmetry) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card effect">
+                            <div class="card-body">
+                                <h6 class="text-muted">Intervention Effect</h6>
+                                {% if summary.effect_size is not none %}
+                                <h2 class="mb-0 {% if summary.effect_size > 0 %}text-success{% endif %}">
+                                    {{ "%.3f"|format(summary.effect_size) }}
+                                </h2>
+                                <small>Reduction in asymmetry</small>
+                                {% else %}
+                                <h2 class="mb-0 text-muted">N/A</h2>
+                                <small>Need both groups for comparison</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Chart -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Intervention vs Control Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="comparisonChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Intervention Sessions -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Intervention Sessions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Session</th>
+                                                <th>Type</th>
+                                                <th>Intensity</th>
+                                                <th>Asymmetry</th>
+                                                <th>Scaffolds</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in intervention_data %}
+                                            <tr>
+                                                <td><code>{{ session.session_uuid[:8] }}</code></td>
+                                                <td>{{ session.intervention_type or 'explicit_mapping' }}</td>
+                                                <td>{{ "%.1f"|format(session.intensity) }}</td>
+                                                <td>{{ "%.3f"|format(session.asymmetry) if session.asymmetry else 'N/A' }}</td>
+                                                <td>{{ session.scaffold_responses }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Control Sessions -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">Control Sessions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Session</th>
+                                                <th>Forward Acc</th>
+                                                <th>Reverse Acc</th>
+                                                <th>Asymmetry</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in control_data %}
+                                            <tr>
+                                                <td><code>{{ session.session_uuid[:8] }}</code></td>
+                                                <td>{{ "%.2f"|format(session.forward_accuracy) if session.forward_accuracy else 'N/A' }}</td>
+                                                <td>{{ "%.2f"|format(session.reverse_accuracy) if session.reverse_accuracy else 'N/A' }}</td>
+                                                <td>{{ "%.3f"|format(session.asymmetry) if session.asymmetry else 'N/A' }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Intervention Types -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Available Intervention Types</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Explicit Mapping</h6>
+                                <p class="text-muted small">Forces expert to explicitly map old understanding to new before communicating.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Perspective Taking</h6>
+                                <p class="text-muted small">Simulates novice perspective to improve theory of mind.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Structural Visualization</h6>
+                                <p class="text-muted small">Visualizes knowledge changes to reduce cognitive load.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Forward Accuracy', 'Reverse Accuracy', 'Asymmetry'],
+                datasets: [
+                    {
+                        label: 'Intervention',
+                        data: [0.85, 0.72, 0.13],  // Sample data
+                        backgroundColor: 'rgba(26, 152, 80, 0.7)',
+                        borderColor: '#1A9850',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Control',
+                        data: [0.82, 0.52, 0.30],  // Sample data
+                        backgroundColor: 'rgba(178, 24, 43, 0.7)',
+                        borderColor: '#B2182B',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Performance by Group'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

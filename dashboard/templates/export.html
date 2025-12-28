@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Export Data - Reversal Curse{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-0">Export Data</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Experimental Data</div>
+            <div class="card-body">
+                <p>Export all completed experiment sessions with trial-level data.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('export_csv') }}" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Export as CSV
+                    </a>
+                    <a href="{{ url_for('export_json') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark-code"></i> Export as JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Export Formats</div>
+            <div class="card-body">
+                <h6>CSV Format</h6>
+                <p class="text-muted small">Wide-format data suitable for Excel, SPSS, or R. Includes one row per participant with aggregated accuracy scores.</p>
+
+                <h6>JSON Format</h6>
+                <p class="text-muted small">Nested format with complete trial-level data. Suitable for Python analysis or archival.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Data Dictionary</div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>session_uuid</code></td>
+                    <td>string</td>
+                    <td>Unique session identifier</td>
+                </tr>
+                <tr>
+                    <td><code>condition</code></td>
+                    <td>string</td>
+                    <td>Experimental condition (A_then_B, B_then_A, simultaneous)</td>
+                </tr>
+                <tr>
+                    <td><code>forward_correct</code></td>
+                    <td>integer</td>
+                    <td>Number of correct forward test trials</td>
+                </tr>
+                <tr>
+                    <td><code>forward_total</code></td>
+                    <td>integer</td>
+                    <td>Total forward test trials</td>
+                </tr>
+                <tr>
+                    <td><code>reverse_correct</code></td>
+                    <td>integer</td>
+                    <td>Number of correct reverse test trials</td>
+                </tr>
+                <tr>
+                    <td><code>reverse_total</code></td>
+                    <td>integer</td>
+                    <td>Total reverse test trials</td>
+                </tr>
+                <tr>
+                    <td><code>forward_accuracy</code></td>
+                    <td>float</td>
+                    <td>Forward accuracy (forward_correct / forward_total)</td>
+                </tr>
+                <tr>
+                    <td><code>reverse_accuracy</code></td>
+                    <td>float</td>
+                    <td>Reverse accuracy (reverse_correct / reverse_total)</td>
+                </tr>
+                <tr>
+                    <td><code>asymmetry</code></td>
+                    <td>float</td>
+                    <td>Asymmetry score (forward - reverse accuracy)</td>
+                </tr>
+                <tr>
+                    <td><code>duration_seconds</code></td>
+                    <td>float</td>
+                    <td>Total session duration</td>
+                </tr>
+                <tr>
+                    <td><code>attention_check_passed</code></td>
+                    <td>boolean</td>
+                    <td>Whether participant passed attention check</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
